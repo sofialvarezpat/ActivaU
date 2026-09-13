@@ -12,7 +12,4 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="temurin-21" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
-  <component name="VcsManagerConfiguration">
-    <option name="MARK_IGNORED_AS_EXCLUDED" value="true" />
-  </component>
 </project>
