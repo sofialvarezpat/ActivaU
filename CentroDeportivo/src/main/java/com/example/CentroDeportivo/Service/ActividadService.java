@@ -1,0 +1,35 @@
+package com.example.CentroDeportivo.Service;
+
+import com.example.CentroDeportivo.Entity.Actividad;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+public interface ActividadService {
+
+    //Busqueda Normal
+    List<Actividad> listarTodas();
+
+    Actividad obtenerPorId(Long id);
+
+    //Busqueda por disciplina, entrenador, fecha y nivel.
+    List<Actividad> buscar(Long disciplinaId, Long entrenadorId, LocalDate fecha, String nivel);
+
+    Actividad programar(Actividad datos);
+
+    //Evita conflictos de horario en el mismo escenario o con el mismo entrenador
+    void validarSinConflictos(Long escenarioId, Long entrenadorId, LocalDate fecha,
+                            LocalTime horaInicio, LocalTime horaFin, Long actividadIdExcluir);
+
+    Actividad ocuparCupo(Long actividadId);
+
+    Actividad liberarCupo(Long actividadId);
+
+    //Boolean porque tiene cupo o no
+    boolean tieneCupo(Long actividadId);
+
+    Actividad cancelar(Long actividadId);
+
+    Actividad finalizar(Long actividadId);
+}
