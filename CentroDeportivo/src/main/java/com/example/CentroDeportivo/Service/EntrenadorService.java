@@ -11,6 +11,7 @@ public interface EntrenadorService {
 
     Entrenador obtenerPorId(Long id);
 
+    //Busqueda por Especialidad
     List<Entrenador> buscarPorEspecialidad(String especialidad);
 
     Entrenador registrar(Entrenador entrenador);
