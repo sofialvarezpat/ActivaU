@@ -15,7 +15,7 @@ public class Membresia {
     private Long id;
 
     private LocalDate fechaInicio;
-    private LocalDate fecha; // Tal como está en el diagrama, aunque suele ser fechaFin
+    private LocalDate fechaFin; // Tal como está en el diagrama, aunque suele ser fechaFin
     private String estado;
 
     @ManyToOne
