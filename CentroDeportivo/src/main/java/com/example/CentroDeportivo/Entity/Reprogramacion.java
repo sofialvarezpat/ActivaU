@@ -17,6 +17,7 @@ public class Reprogramacion {
     private Long id;
 
     private LocalDate fechaAnterior;
+    private LocalDate fechaNueva;
     private LocalTime horaAnterior;
     private LocalTime horaNueva;
     private String motivo;
