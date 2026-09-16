@@ -4,6 +4,8 @@ import com.example.CentroDeportivo.Entity.Actividad;
 import com.example.CentroDeportivo.Repository.ActividadRepository;
 import com.example.CentroDeportivo.Service.ActividadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,6 +30,11 @@ public class ActividadServiceImpl implements ActividadService {
                 .orElseThrow(() -> new RuntimeException(
                         "No se encontró la actividad con ID: " + id
                 ));
+    }
+
+    @Override
+    public Page<Actividad> buscar(Long disciplinaId, Long entrenadorId, LocalDate fecha, String nivel, Pageable pageable) {
+        return null;
     }
 
 

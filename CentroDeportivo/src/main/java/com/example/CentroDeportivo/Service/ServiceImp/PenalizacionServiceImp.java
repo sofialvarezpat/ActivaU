@@ -58,7 +58,12 @@ public class PenalizacionServiceImp implements PenalizacionService {
     }
 
     @Override
+    public Penalizacion aplicarPorInasistencia(Long afiliadoId, Long reservaId, String motivo) {
+        return null;
+    }
+
     @Transactional
+    @Override
     public Penalizacion aplicarPorInasistencia(Long afiliadoId, String motivo) {
         Afiliado afiliado = afiliadoRepository.findById(afiliadoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Afiliado no encontrado: " + afiliadoId));
