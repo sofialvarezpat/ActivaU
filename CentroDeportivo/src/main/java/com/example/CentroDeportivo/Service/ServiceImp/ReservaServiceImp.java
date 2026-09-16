@@ -45,6 +45,15 @@ public class ReservaServiceImp implements ReservaService {
     private final PenalizacionService penalizacionService;
     private final ListaEsperaService listaEsperaService;
 
+
+
+//---------------ESTE IMP PUEDE FALLAR HASTA QUE NO SE CONFIRMEN ESTOS 4 PUNTOS---------------------
+
+            //1. Traslape: validar solo fecha+hora, o también escenario/entrenador?
+            //2. origenCupo: usando "DIRECTO" como placeholder, faltan valores reales.
+            //3. Falta estado PENDIENTE_PAGO explícito (reusa EN_ESPERA, mezcla ambos casos).
+           // 4. ListaEspera.confirmarInvitacion() aún no crea la Reserva real .
+
     @Override
     @Transactional
     public List<Reserva> listarPorAfiliado(Long afiliadoId) {
