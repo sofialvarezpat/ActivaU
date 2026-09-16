@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface ReservaService {
 
+    // Revisado contra la entidad Reserva: sin cambios estructurales
     //Busqueda normal
     List<Reserva> listarPorAfiliado(Long afiliadoId);
 
@@ -17,13 +18,14 @@ public interface ReservaService {
     //En caso contrario, pendiente de pago
     Reserva reservar(Long afiliadoId, Long actividadId);
 
-    //Llamado por PagoService cuando se confirma el pago asociado a una reserva pendiente.
+    //Llamado por PagoService cuando se confirma el pago asociado a una reserva pendiente
     Reserva confirmarPorPago(Long reservaId);
 
+
     //Cancela una reserva, libera el cupo, invita al siguiente en lista de espera
-    //Genera penalización si la cancelación fue fuera de plazo.
+    //Genera penalización si la cancelación fue fuera de plazo
     Reserva cancelar(Long reservaId, String motivo);
 
-    //n afiliado no puede reservar dos actividades que se traslapen.
+    //n afiliado no puede reservar dos actividades que se traslapen
     void validarSinTraslapeConOtrasReservas(Long afiliadoId, Actividad actividadNueva, Long reservaIdExcluir);
 }
