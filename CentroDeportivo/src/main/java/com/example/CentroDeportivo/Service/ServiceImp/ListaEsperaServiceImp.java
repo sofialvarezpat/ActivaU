@@ -20,50 +20,50 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ListaEsperaServiceImp implements ListaEsperaService {
 
+    // Estados según diagrama de actividad de Lista de Espera
+    private static final String ESTADO_EN_ESPERA = "EN_ESPERA";
+    private static final String ESTADO_INVITADO = "INVITADO";
+    private static final String ESTADO_EXPIRADO = "EXPIRADO";
+
     private final ListaEsperaRepository listaEsperaRepository;
     private final AfiliadoRepository afiliadoRepository;
     private final ActividadRepository actividadRepository;
 
-    //LISTAR POR ACTIVIDAD
     @Override
     @Transactional
     public List<ListaEspera> listarPorActividad(Long actividadId) {
         return listaEsperaRepository.findByActividadIdOrderByPosicionAsc(actividadId);
     }
-    //INSCRIBIR
+
     @Override
     @Transactional
-
     public ListaEspera inscribir(Long afiliadoId, Long actividadId) {
         Afiliado afiliado = afiliadoRepository.findById(afiliadoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Afiliado no encontrado: " + afiliadoId));
         Actividad actividad = actividadRepository.findById(actividadId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Actividad no encontrada: " + actividadId));
 
-        Integer siguientePosicion = listaEsperaRepository
-                .findMaxPosicionByActividadId(actividadId)
-                .map(p -> p + 1)
-                .orElse(1);
+        Optional<Integer> maxPosicion = listaEsperaRepository.findMaxPosicionByActividadId(actividadId);
+        Integer siguientePosicion = maxPosicion.map(p -> p + 1).orElse(1);
 
         ListaEspera listaEspera = new ListaEspera();
         listaEspera.setAfiliado(afiliado);
         listaEspera.setActividad(actividad);
         listaEspera.setPosicion(siguientePosicion);
         listaEspera.setFechaIngreso(LocalDateTime.now());
-        listaEspera.setEstado("EN_ESPERA");
+        listaEspera.setEstado(ESTADO_EN_ESPERA);
 
         return listaEsperaRepository.save(listaEspera);
     }
 
-    //INVITAR SIGUIENTE
     @Override
     @Transactional
     public Optional<ListaEspera> invitarSiguiente(Long actividadId) {
         Optional<ListaEspera> siguiente = listaEsperaRepository
-                .findFirstByActividadIdAndEstadoOrderByPosicionAsc(actividadId, "EN_ESPERA");
+                .findFirstByActividadIdAndEstadoOrderByPosicionAsc(actividadId, ESTADO_EN_ESPERA);
 
         siguiente.ifPresent(le -> {
-            le.setEstado("INVITADO");
+            le.setEstado(ESTADO_INVITADO);
             le.setFechaInvitacion(LocalDateTime.now());
             listaEsperaRepository.save(le);
         });
@@ -71,25 +71,29 @@ public class ListaEsperaServiceImp implements ListaEsperaService {
         return siguiente;
     }
 
-    //CONFIRMAR INVITACION
     @Override
     @Transactional
     public ListaEspera confirmarInvitacion(Long listaEsperaId) {
         ListaEspera listaEspera = obtenerPorId(listaEsperaId);
-        listaEspera.setEstado("CONFIRMADO");
-        return listaEsperaRepository.save(listaEspera);
+
+
+        listaEsperaRepository.delete(listaEspera);
+        return listaEspera;
     }
 
-    // EXPIRAR INVITACION
     @Override
     @Transactional
     public ListaEspera expirarInvitacion(Long listaEsperaId) {
         ListaEspera listaEspera = obtenerPorId(listaEsperaId);
-        listaEspera.setEstado("EXPIRADO");
-        return listaEsperaRepository.save(listaEspera);
+        listaEspera.setEstado(ESTADO_EXPIRADO);
+        listaEsperaRepository.save(listaEspera);
+
+        // Según el diagrama: al expirar, se invita automáticamente al siguiente en la fila
+        invitarSiguiente(listaEspera.getActividad().getId());
+
+        return listaEspera;
     }
 
-    //OBTENER POR ID
     @Override
     @Transactional
     public ListaEspera obtenerPorId(Long id) {
