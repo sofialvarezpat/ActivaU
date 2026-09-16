@@ -15,7 +15,7 @@ public interface ActividadService {
 
     Actividad obtenerPorId(Long id);
 
-    //El requerimiento exige "filtros y paginaciion" en la
+    //El requerimiento exige "filtros y paginacion" en la
     //busqueda de actividades
     Page<Actividad> buscar(Long disciplinaId, Long entrenadorId, LocalDate fecha, String nivel, Pageable pageable);
 
