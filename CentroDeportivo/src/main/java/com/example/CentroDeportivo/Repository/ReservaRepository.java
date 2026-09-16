@@ -10,4 +10,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByAfiliadoId(Long afiliadoId);
     List<Reserva> findByActividadId(Long actividadId);
     boolean existsByAfiliadoIdAndActividadId(Long afiliadoId, Long actividadId);
+
+    List<Reserva> findByAfiliadoIdAndEstadoNot(Long afiliadoId, String estadoCancelada);
 }
