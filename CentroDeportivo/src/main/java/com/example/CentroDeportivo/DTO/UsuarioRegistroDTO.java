@@ -6,7 +6,8 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class UsuarioRegistroDTO {
+public class
+UsuarioRegistroDTO {
     @NotBlank(message = "Los nombres son obligatorios")
     private String nombres;
 

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,12 +20,14 @@ public class ActividadServiceImpl implements ActividadService {
     private final ActividadRepository actividadRepository;
 
     @Override
+    @Transactional
     public List<Actividad> listarTodas() {
         return actividadRepository.findAll();
     }
 
 
     @Override
+    @Transactional
     public Actividad obtenerPorId(Long id) {
         return actividadRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(
@@ -39,6 +42,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public List<Actividad> buscar(
             Long disciplinaId,
             Long entrenadorId,
@@ -69,6 +73,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public Actividad programar(Actividad datos) {
 
         if (datos.getFecha() == null) {
@@ -122,6 +127,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public void validarSinConflictos(
             Long escenarioId,
             Long entrenadorId,
@@ -171,6 +177,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public Actividad ocuparCupo(Long actividadId) {
 
         Actividad actividad = obtenerPorId(actividadId);
@@ -190,6 +197,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public Actividad liberarCupo(Long actividadId) {
 
         Actividad actividad = obtenerPorId(actividadId);
@@ -208,6 +216,7 @@ public class ActividadServiceImpl implements ActividadService {
     }
 
     @Override
+    @Transactional
     public boolean tieneCupo(Long actividadId) {
 
         Actividad actividad = obtenerPorId(actividadId);
@@ -218,6 +227,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public Actividad cancelar(Long actividadId) {
 
         Actividad actividad = obtenerPorId(actividadId);
@@ -229,6 +239,7 @@ public class ActividadServiceImpl implements ActividadService {
 
 
     @Override
+    @Transactional
     public Actividad finalizar(Long actividadId) {
 
         Actividad actividad = obtenerPorId(actividadId);
