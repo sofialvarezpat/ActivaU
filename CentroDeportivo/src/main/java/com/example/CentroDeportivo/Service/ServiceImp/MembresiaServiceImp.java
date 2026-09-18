@@ -70,7 +70,7 @@ public class MembresiaServiceImp implements MembresiaService {
     @Transactional
     public Optional<Membresia> obtenerMembresiaVigente(Long afiliadoId) {
         // Query derivada del nombre del método (Spring Data JPA la genera automáticamente)
-        return membresiaRepository.findByAfiliadoIdAndEstadoAndFechaGreaterThanEqual(
+        return membresiaRepository.findByAfiliadoIdAndEstadoAndFechaFinGreaterThanEqual(
                 afiliadoId, "ACTIVA", LocalDate.now());
     }
 
@@ -84,7 +84,7 @@ public class MembresiaServiceImp implements MembresiaService {
     @Transactional
     public void venceMembresiasCaducadas() {
         List<Membresia> vencidas = membresiaRepository
-                .findByEstadoAndFechaLessThan("ACTIVA", LocalDate.now());
+                .findByEstadoAndFechaFinLessThan("ACTIVA", LocalDate.now());
 
         vencidas.forEach(m -> m.setEstado("VENCIDA"));
         membresiaRepository.saveAll(vencidas);

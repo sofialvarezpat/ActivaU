@@ -1,6 +1,7 @@
 package com.example.CentroDeportivo.Service;
 
 import com.example.CentroDeportivo.Entity.Penalizacion;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ public interface PenalizacionService {
     //Sin esto no habria forma de persistir a qué
     //reserva/clase corresponde la inasistencia que genero la penalización
     Penalizacion aplicarPorInasistencia(Long afiliadoId, Long reservaId, String motivo);
+
+    @Transactional
+    Penalizacion aplicarPorInasistencia(Long afiliadoId, String motivo);
 
     //Libera el bloqueo de los afiliados cuya penalización ya cumplio el periodo de bloqueo
     void liberarBloqueosVencidos();

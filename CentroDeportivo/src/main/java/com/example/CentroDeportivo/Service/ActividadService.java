@@ -19,6 +19,12 @@ public interface ActividadService {
     //busqueda de actividades
     Page<Actividad> buscar(Long disciplinaId, Long entrenadorId, LocalDate fecha, String nivel, Pageable pageable);
 
+    List<Actividad> buscar(
+            Long disciplinaId,
+            Long entrenadorId,
+            LocalDate fecha,
+            String nivel);
+
     Actividad programar(Actividad datos);
 
     //Evita conflictos de horario en el mismo escenario o con el mismo entrenador
