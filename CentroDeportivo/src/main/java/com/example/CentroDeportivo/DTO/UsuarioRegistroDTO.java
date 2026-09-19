@@ -6,12 +6,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-<<<<<<< HEAD
-public class xUsuarioRegistroDTO {
-=======
-public class
-UsuarioRegistroDTO {
->>>>>>> 1f2f75e54d319b49b18bd8df9af80f4eaa147339
+public class UsuarioRegistroDTO {
     @NotBlank(message = "Los nombres son obligatorios")
     private String nombres;
 
@@ -31,4 +26,5 @@ UsuarioRegistroDTO {
     private String documentoIdentidad;
 
     private LocalDate fechaNacimiento;
+
 }
