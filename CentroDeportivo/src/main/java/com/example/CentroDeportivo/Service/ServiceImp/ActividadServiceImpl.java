@@ -1,8 +1,11 @@
 package com.example.CentroDeportivo.Service.ServiceImp;
 
 import com.example.CentroDeportivo.Entity.Actividad;
+import com.example.CentroDeportivo.Exception.RecursoNoEncontradoException;
+import com.example.CentroDeportivo.Exception.ReglaNegocioException;
 import com.example.CentroDeportivo.Repository.ActividadRepository;
 import com.example.CentroDeportivo.Service.ActividadService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
