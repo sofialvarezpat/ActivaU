@@ -1,5 +1,5 @@
 package com.example.CentroDeportivo.Entity.Enum;
 
 public enum EstadoMembresia {
-    ACTIVA, VENCIDA, CANCELADA
+    PENDIENTE_PAGO, ACTIVA, VENCIDA, CANCELADA
 }

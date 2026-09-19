@@ -1,8 +1,10 @@
 package com.example.CentroDeportivo.Service.ServiceImp;
 
 import com.example.CentroDeportivo.Entity.Afiliado;
+import com.example.CentroDeportivo.Entity.Enum.EstadoMembresia;
 import com.example.CentroDeportivo.Entity.Membresia;
 import com.example.CentroDeportivo.Entity.TipoMembresia;
+import com.example.CentroDeportivo.Exception.ConflictException;
 import com.example.CentroDeportivo.Exception.RecursoNoEncontradoException;
 import com.example.CentroDeportivo.Repository.AfiliadoRepository;
 import com.example.CentroDeportivo.Repository.MembresiaRepository;
@@ -48,7 +50,7 @@ public class MembresiaServiceImp implements MembresiaService {
         Membresia membresia = new Membresia();
         membresia.setAfiliado(afiliado);
         membresia.setTipoMembresia(tipoMembresia);
-        membresia.setEstado("PENDIENTE_PAGO");
+        membresia.setEstado(EstadoMembresia.PENDIENTE_PAGO);
 
         return membresiaRepository.save(membresia);
     }
@@ -58,10 +60,15 @@ public class MembresiaServiceImp implements MembresiaService {
     public Membresia activar(Long membresiaId) {
         Membresia membresia = obtenerPorId(membresiaId);
 
+        if (membresia.getEstado() != EstadoMembresia.PENDIENTE_PAGO) {
+            throw new ConflictException(
+                    "Solo se pueden activar membresías pendientes de pago (estado actual: " + membresia.getEstado() + ")");
+        }
+
         LocalDate inicio = LocalDate.now();
         membresia.setFechaInicio(inicio);
-        membresia.setFechaFin(inicio.plusMonths(1));
-        membresia.setEstado("ACTIVA");
+        membresia.setFechaFin(inicio.plusDays(membresia.getTipoMembresia().getDuracionDias()));
+        membresia.setEstado(EstadoMembresia.ACTIVA);
 
         return membresiaRepository.save(membresia);
     }
@@ -69,9 +76,8 @@ public class MembresiaServiceImp implements MembresiaService {
     @Override
     @Transactional
     public Optional<Membresia> obtenerMembresiaVigente(Long afiliadoId) {
-        // Query derivada del nombre del método (Spring Data JPA la genera automáticamente)
         return membresiaRepository.findByAfiliadoIdAndEstadoAndFechaFinGreaterThanEqual(
-                afiliadoId, "ACTIVA", LocalDate.now());
+                afiliadoId, EstadoMembresia.ACTIVA, LocalDate.now());
     }
 
     @Override
@@ -84,9 +90,9 @@ public class MembresiaServiceImp implements MembresiaService {
     @Transactional
     public void venceMembresiasCaducadas() {
         List<Membresia> vencidas = membresiaRepository
-                .findByEstadoAndFechaFinLessThan("ACTIVA", LocalDate.now());
+                .findByEstadoAndFechaFinLessThan(EstadoMembresia.ACTIVA, LocalDate.now());
 
-        vencidas.forEach(m -> m.setEstado("VENCIDA"));
+        vencidas.forEach(m -> m.setEstado(EstadoMembresia.VENCIDA));
         membresiaRepository.saveAll(vencidas);
     }
 }
