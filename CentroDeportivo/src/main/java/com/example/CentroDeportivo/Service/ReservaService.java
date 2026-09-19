@@ -1,5 +1,6 @@
 package com.example.CentroDeportivo.Service;
 
+
 import com.example.CentroDeportivo.Entity.Actividad;
 import com.example.CentroDeportivo.Entity.Reserva;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public interface ReservaService {
 
-    // Revisado contra la entidad Reserva: sin cambios estructurales
+
     //Busqueda normal
     List<Reserva> listarPorAfiliado(Long afiliadoId);
 
@@ -25,6 +26,11 @@ public interface ReservaService {
     //Cancela una reserva, libera el cupo, invita al siguiente en lista de espera
     //Genera penalización si la cancelación fue fuera de plazo
     Reserva cancelar(Long reservaId, String motivo);
+
+    //Convierte una invitación de lista de espera ya ACEPTADA en una Reserva real
+
+
+    Reserva confirmarDesdeListaEspera(Long listaEsperaId);
 
     //n afiliado no puede reservar dos actividades que se traslapen
     void validarSinTraslapeConOtrasReservas(Long afiliadoId, Actividad actividadNueva, Long reservaIdExcluir);

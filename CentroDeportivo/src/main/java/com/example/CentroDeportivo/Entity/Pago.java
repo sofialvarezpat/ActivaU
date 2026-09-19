@@ -1,6 +1,5 @@
 package com.example.CentroDeportivo.Entity;
 
-
 import com.example.CentroDeportivo.Entity.Enum.EstadoPago;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -30,6 +29,14 @@ public class Pago {
     @Column(name = "referencia_pasarela", length = 60)
     private String referenciaPasarela;
 
+    // Últimos dígitos de la tarjeta simulada
+    @Column(name = "numero_tarjeta_simulado", length = 20)
+    private String numeroTarjetaSimulado;
+
+    // Mensaje de respuesta de la pasarela simulada
+    @Column(name = "mensaje_pasarela", length = 200)
+    private String mensajePasarela;
+
     @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
 
@@ -37,12 +44,12 @@ public class Pago {
     @JoinColumn(name = "afiliado_id")
     private Afiliado afiliado;
 
-    // Relación 0..1 a 1 con Reserva
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reserva_id", unique = true)
     private Reserva reserva;
 
-    // Relación 0..1 a 1 con Membresia
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "membresia_id", unique = true)
     private Membresia membresia;

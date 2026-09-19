@@ -39,11 +39,18 @@ public class ReservaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(reserva);
     }
 
-    // CONFIRMAR RESERVA POR PAGO (normalmente invocado desde PagoService)
+    // CONFIRMAR RESERVA POR PAGO
     @PatchMapping("/{reservaId}/confirmar-por-pago")
     public ResponseEntity<Reserva> confirmarPorPago(@PathVariable Long reservaId) {
         Reserva reserva = reservaServiceImp.confirmarPorPago(reservaId);
         return ResponseEntity.ok(reserva);
+    }
+
+    // CONVERTIR UNA INVITACIÓN DE LISTA DE ESPERA  EN UNA RESERVA REAL
+    @PostMapping("/desde-lista-espera/{listaEsperaId}")
+    public ResponseEntity<Reserva> confirmarDesdeListaEspera(@PathVariable Long listaEsperaId) {
+        Reserva reserva = reservaServiceImp.confirmarDesdeListaEspera(listaEsperaId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reserva);
     }
 
     // CANCELAR RESERVA

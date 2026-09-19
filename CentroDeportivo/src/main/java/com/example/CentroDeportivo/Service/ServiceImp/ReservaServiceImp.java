@@ -1,14 +1,12 @@
 package com.example.CentroDeportivo.Service.ServiceImp;
 
 import com.example.CentroDeportivo.Entity.Actividad;
-import com.example.CentroDeportivo.Entity.Reserva;
-import com.example.CentroDeportivo.Service.ReservaService;
-
-import java.util.List;
-
-import com.example.CentroDeportivo.Entity.Actividad;
 import com.example.CentroDeportivo.Entity.Afiliado;
+import com.example.CentroDeportivo.Entity.Enum.EstadoReserva;
+import com.example.CentroDeportivo.Entity.Enum.OrigenCupo;
+import com.example.CentroDeportivo.Entity.ListaEspera;
 import com.example.CentroDeportivo.Entity.Reserva;
+import com.example.CentroDeportivo.Exception.ConflictException;
 import com.example.CentroDeportivo.Exception.RecursoNoEncontradoException;
 import com.example.CentroDeportivo.Exception.ReglaNegocioException;
 import com.example.CentroDeportivo.Repository.ActividadRepository;
@@ -25,18 +23,13 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class ReservaServiceImp implements ReservaService {
 
-    // Estados según diagrama de actividad de Reserva
-    private static final String ESTADO_EN_ESPERA = "EN_ESPERA";
-    private static final String ESTADO_CONFIRMADA = "CONFIRMADA";
-    private static final String ESTADO_CANCELADA = "CANCELADA";
-
-    private static final String ORIGEN_DIRECTO = "DIRECTO"; // placeholder, confirmar valores reales
+    // cancelar con menos de 12h de anticipación penaliza.
+    private static final int HORAS_MINIMAS_SIN_PENALIZAR = 12;
 
     private final ReservaRepository reservaRepository;
     private final AfiliadoRepository afiliadoRepository;
@@ -44,15 +37,6 @@ public class ReservaServiceImp implements ReservaService {
     private final MembresiaService membresiaService;
     private final PenalizacionService penalizacionService;
     private final ListaEsperaService listaEsperaService;
-
-
-
-//---------------ESTE IMP PUEDE FALLAR HASTA QUE NO SE CONFIRMEN ESTOS 4 PUNTOS---------------------
-
-            //1. Traslape: validar solo fecha+hora, o también escenario/entrenador?
-            //2. origenCupo: usando "DIRECTO" como placeholder, faltan valores reales.
-            //3. Falta estado PENDIENTE_PAGO explícito (reusa EN_ESPERA, mezcla ambos casos).
-           // 4. ListaEspera.confirmarInvitacion() aún no crea la Reserva real .
 
     @Override
     @Transactional
@@ -75,35 +59,62 @@ public class ReservaServiceImp implements ReservaService {
         Actividad actividad = actividadRepository.findById(actividadId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Actividad no encontrada: " + actividadId));
 
-        validarSinTraslapeConOtrasReservas(afiliadoId, actividad, null);
+        if (reservaRepository.existsByAfiliadoIdAndActividadId(afiliadoId, actividadId)) {
+            throw new ConflictException("El afiliado ya tiene una reserva para esta actividad");
+        }
 
-        Reserva reserva = new Reserva();
-        reserva.setAfiliado(afiliado);
-        reserva.setActividad(actividad);
-        reserva.setFechaReserva(LocalDateTime.now());
-        reserva.setOrigenCupo(ORIGEN_DIRECTO);
+        validarSinTraslapeConOtrasReservas(afiliadoId, actividad, null);
 
         boolean hayCupo = actividad.getCuposDisponibles() != null && actividad.getCuposDisponibles() > 0;
 
         if (!hayCupo) {
-            reserva.setEstado(ESTADO_EN_ESPERA);
-            return reservaRepository.save(reserva);
+            // Sin cupo: NO se crea Reserva todavía. Se inscribe en la lista de espera
+            // y la Reserva real se genera después, cuando se libera un cupo y el
+            // afiliado confirma la invitación
+            ListaEspera inscripcion = listaEsperaService.inscribir(afiliadoId, actividadId);
+            throw new ReglaNegocioException(
+                    "La actividad no tiene cupos disponibles. Se inscribió al afiliado en la lista de espera, posición "
+                            + inscripcion.getPosicion());
         }
 
-        // Hay cupo: según el diagrama, si el afiliado tiene membresía vigente,
-        // se confirma de inmediato; si no, queda pendiente de pago.
-        boolean tieneMembresiaVigente = membresiaService.tieneMembresiaVigente(afiliadoId);
+        Reserva reserva = new Reserva();
+        reserva.setAfiliado(afiliado);
+        reserva.setActividad(actividad);
+        reserva.setOrigenCupo(OrigenCupo.DIRECTO);
 
         actividad.setCuposDisponibles(actividad.getCuposDisponibles() - 1);
         actividadRepository.save(actividad);
 
-        if (tieneMembresiaVigente) {
-            reserva.setEstado(ESTADO_CONFIRMADA);
-        } else {
-            // Pendiente de pago: se mantiene sin estado "CONFIRMADA" hasta que
-            // PagoService llame a confirmarPorPago(...)
-            reserva.setEstado(ESTADO_EN_ESPERA); // placeholder: revisar si debe ser otro estado, ej. "PENDIENTE_PAGO"
+        boolean tieneMembresiaVigente = membresiaService.tieneMembresiaVigente(afiliadoId);
+        reserva.setEstado(tieneMembresiaVigente ? EstadoReserva.CONFIRMADA : EstadoReserva.PENDIENTE);
+
+        return reservaRepository.save(reserva);
+    }
+
+    @Override
+    @Transactional
+    public Reserva confirmarDesdeListaEspera(Long listaEsperaId) {
+        // confirmarInvitacion valida que la invitación esté en estado INVITADO
+        // y la marca como ACEPTADO
+        ListaEspera invitacion = listaEsperaService.confirmarInvitacion(listaEsperaId);
+
+        Afiliado afiliado = invitacion.getAfiliado();
+        Actividad actividad = invitacion.getActividad();
+
+        if (reservaRepository.existsByAfiliadoIdAndActividadId(afiliado.getId(), actividad.getId())) {
+            throw new ConflictException("El afiliado ya tiene una reserva para esta actividad");
         }
+
+        Reserva reserva = new Reserva();
+        reserva.setAfiliado(afiliado);
+        reserva.setActividad(actividad);
+        reserva.setOrigenCupo(OrigenCupo.LISTA_ESPERA);
+
+        actividad.setCuposDisponibles(actividad.getCuposDisponibles() - 1);
+        actividadRepository.save(actividad);
+
+        boolean tieneMembresiaVigente = membresiaService.tieneMembresiaVigente(afiliado.getId());
+        reserva.setEstado(tieneMembresiaVigente ? EstadoReserva.CONFIRMADA : EstadoReserva.PENDIENTE);
 
         return reservaRepository.save(reserva);
     }
@@ -112,7 +123,12 @@ public class ReservaServiceImp implements ReservaService {
     @Transactional
     public Reserva confirmarPorPago(Long reservaId) {
         Reserva reserva = obtenerPorId(reservaId);
-        reserva.setEstado(ESTADO_CONFIRMADA);
+
+        if (reserva.getEstado() == EstadoReserva.CANCELADA) {
+            throw new ConflictException("No se puede confirmar una reserva que ya fue cancelada");
+        }
+
+        reserva.setEstado(EstadoReserva.CONFIRMADA);
         return reservaRepository.save(reserva);
     }
 
@@ -122,7 +138,18 @@ public class ReservaServiceImp implements ReservaService {
         Reserva reserva = obtenerPorId(reservaId);
         Actividad actividad = reserva.getActividad();
 
-        reserva.setEstado(ESTADO_CANCELADA);
+        if (reserva.getEstado() == EstadoReserva.CANCELADA) {
+            throw new ConflictException("La reserva ya estaba cancelada");
+        }
+
+        LocalDateTime inicioActividad = LocalDateTime.of(actividad.getFecha(), actividad.getHoraInicio());
+        if (inicioActividad.isBefore(LocalDateTime.now())) {
+            throw new ReglaNegocioException("No se puede cancelar una actividad que ya ocurrió");
+        }
+
+        long horasAnticipacion = Duration.between(LocalDateTime.now(), inicioActividad).toHours();
+
+        reserva.setEstado(EstadoReserva.CANCELADA);
         reservaRepository.save(reserva);
 
         // Libera el cupo
@@ -131,11 +158,8 @@ public class ReservaServiceImp implements ReservaService {
             actividadRepository.save(actividad);
         }
 
-        // Penaliza si la cancelación fue fuera de plazo (< 12h de anticipación, según diagrama de Penalización)
-        LocalDateTime inicioActividad = LocalDateTime.of(actividad.getFecha(), actividad.getHoraInicio());
-        long horasAnticipacion = Duration.between(LocalDateTime.now(), inicioActividad).toHours();
-
-        if (horasAnticipacion < 12) {
+        // Penaliza si la cancelación fue fuera de plazo (< 12h de anticipación)
+        if (horasAnticipacion < HORAS_MINIMAS_SIN_PENALIZAR) {
             penalizacionService.aplicarPorCancelacionTardia(
                     reserva.getAfiliado().getId(), reservaId, (int) horasAnticipacion, motivo);
         }
@@ -150,7 +174,7 @@ public class ReservaServiceImp implements ReservaService {
     @Transactional
     public void validarSinTraslapeConOtrasReservas(Long afiliadoId, Actividad actividadNueva, Long reservaIdExcluir) {
         List<Reserva> reservasActivas = reservaRepository
-                .findByAfiliadoIdAndEstadoNot(afiliadoId, ESTADO_CANCELADA);
+                .findByAfiliadoIdAndEstadoNot(afiliadoId, EstadoReserva.CANCELADA);
 
         for (Reserva r : reservasActivas) {
             if (reservaIdExcluir != null && r.getId().equals(reservaIdExcluir)) {

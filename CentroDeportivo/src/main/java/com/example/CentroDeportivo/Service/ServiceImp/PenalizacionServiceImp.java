@@ -1,6 +1,8 @@
 package com.example.CentroDeportivo.Service.ServiceImp;
 
 import com.example.CentroDeportivo.Entity.Afiliado;
+import com.example.CentroDeportivo.Entity.Enum.EstadoPenalizacion;
+import com.example.CentroDeportivo.Entity.Enum.TipoPenalizacion;
 import com.example.CentroDeportivo.Entity.Penalizacion;
 import com.example.CentroDeportivo.Entity.Reserva;
 import com.example.CentroDeportivo.Exception.RecursoNoEncontradoException;
@@ -19,11 +21,11 @@ import java.util.List;
 @AllArgsConstructor
 public class PenalizacionServiceImp implements PenalizacionService {
 
-    // Umbral según diagrama de actividad: cancelaciones con menos de 12h de anticipación se penalizan
+    //  cancelaciones con menos de 12h de anticipación se penalizan
     private static final int HORAS_MINIMAS_SIN_PENALIZAR = 12;
-    private static final double VALOR_PENALIZACION_CANCELACION_TARDIA = 10000.0; // falta confirmar el valor real
-    private static final double VALOR_PENALIZACION_INASISTENCIA = 20000.0;       // falta confirmar el valor real
-    private static final int DIAS_BLOQUEO = 7;                                   // falta confirmar el valor real
+    private static final double VALOR_PENALIZACION_CANCELACION_TARDIA = 10000.0;
+    private static final double VALOR_PENALIZACION_INASISTENCIA = 20000.0;
+    private static final int DIAS_BLOQUEO = 3; // 3 días de bloqueo tras cancelación tardía
 
     private final PenalizacionRepository penalizacionRepository;
     private final AfiliadoRepository afiliadoRepository;
@@ -39,7 +41,7 @@ public class PenalizacionServiceImp implements PenalizacionService {
     @Transactional
     public Penalizacion aplicarPorCancelacionTardia(Long afiliadoId, Long reservaId,
                                                     int horasAnticipacion, String motivo) {
-        // Según el diagrama: si la anticipación es >= 12h, se cancela sin penalización
+        // Si la anticipación es >= 12h, se cancela sin penalización
         if (horasAnticipacion >= HORAS_MINIMAS_SIN_PENALIZAR) {
             return null;
         }
@@ -50,7 +52,7 @@ public class PenalizacionServiceImp implements PenalizacionService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Reserva no encontrada: " + reservaId));
 
         Penalizacion penalizacion = crearPenalizacion(
-                afiliado, "CANCELACION_TARDIA", VALOR_PENALIZACION_CANCELACION_TARDIA, motivo);
+                afiliado, TipoPenalizacion.BLOQUEO_TEMPORAL, VALOR_PENALIZACION_CANCELACION_TARDIA, motivo);
         penalizacion.setReserva(reserva);
         penalizacion.setHorasAnticipacionCancelacion(horasAnticipacion);
 
@@ -69,7 +71,7 @@ public class PenalizacionServiceImp implements PenalizacionService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Afiliado no encontrado: " + afiliadoId));
 
         Penalizacion penalizacion = crearPenalizacion(
-                afiliado, "INASISTENCIA", VALOR_PENALIZACION_INASISTENCIA, motivo);
+                afiliado, TipoPenalizacion.PERDIDA_CUPO, VALOR_PENALIZACION_INASISTENCIA, motivo);
 
         return penalizacionRepository.save(penalizacion);
     }
@@ -82,14 +84,13 @@ public class PenalizacionServiceImp implements PenalizacionService {
 
         bloqueosVencidos.forEach(p -> {
             Afiliado afiliado = p.getAfiliado();
-            afiliado.setEstadoPenalizacion("NINGUNA"); // placeholder, confirmar valor real de "sin penalización"
+            afiliado.setEstadoPenalizacion(EstadoPenalizacion.SIN_PENALIZACION);
             afiliadoRepository.save(afiliado);
         });
     }
 
-
-    private Penalizacion crearPenalizacion(Afiliado afiliado, String tipo, double valor, String motivo) {
-        afiliado.setEstadoPenalizacion("PENALIZADO");
+    private Penalizacion crearPenalizacion(Afiliado afiliado, TipoPenalizacion tipo, double valor, String motivo) {
+        afiliado.setEstadoPenalizacion(EstadoPenalizacion.PENALIZADO);
         afiliadoRepository.save(afiliado);
 
         Penalizacion penalizacion = new Penalizacion();

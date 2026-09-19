@@ -2,8 +2,10 @@ package com.example.CentroDeportivo.Service.ServiceImp;
 
 import com.example.CentroDeportivo.Entity.Actividad;
 import com.example.CentroDeportivo.Entity.Afiliado;
+import com.example.CentroDeportivo.Entity.Enum.EstadoListaEspera;
 import com.example.CentroDeportivo.Entity.ListaEspera;
 import com.example.CentroDeportivo.Exception.RecursoNoEncontradoException;
+import com.example.CentroDeportivo.Exception.ReglaNegocioException;
 import com.example.CentroDeportivo.Repository.ActividadRepository;
 import com.example.CentroDeportivo.Repository.AfiliadoRepository;
 import com.example.CentroDeportivo.Repository.ListaEsperaRepository;
@@ -19,11 +21,6 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class ListaEsperaServiceImp implements ListaEsperaService {
-
-    // Estados según diagrama de actividad de Lista de Espera
-    private static final String ESTADO_EN_ESPERA = "EN_ESPERA";
-    private static final String ESTADO_INVITADO = "INVITADO";
-    private static final String ESTADO_EXPIRADO = "EXPIRADO";
 
     private final ListaEsperaRepository listaEsperaRepository;
     private final AfiliadoRepository afiliadoRepository;
@@ -51,7 +48,7 @@ public class ListaEsperaServiceImp implements ListaEsperaService {
         listaEspera.setActividad(actividad);
         listaEspera.setPosicion(siguientePosicion);
         listaEspera.setFechaIngreso(LocalDateTime.now());
-        listaEspera.setEstado(ESTADO_EN_ESPERA);
+        listaEspera.setEstado(EstadoListaEspera.EN_ESPERA);
 
         return listaEsperaRepository.save(listaEspera);
     }
@@ -60,10 +57,10 @@ public class ListaEsperaServiceImp implements ListaEsperaService {
     @Transactional
     public Optional<ListaEspera> invitarSiguiente(Long actividadId) {
         Optional<ListaEspera> siguiente = listaEsperaRepository
-                .findFirstByActividadIdAndEstadoOrderByPosicionAsc(actividadId, ESTADO_EN_ESPERA);
+                .findFirstByActividadIdAndEstadoOrderByPosicionAsc(actividadId, EstadoListaEspera.EN_ESPERA);
 
         siguiente.ifPresent(le -> {
-            le.setEstado(ESTADO_INVITADO);
+            le.setEstado(EstadoListaEspera.INVITADO);
             le.setFechaInvitacion(LocalDateTime.now());
             listaEsperaRepository.save(le);
         });
@@ -71,24 +68,31 @@ public class ListaEsperaServiceImp implements ListaEsperaService {
         return siguiente;
     }
 
+    // Marca la invitación como ACEPTADO. NO borra el registro
+    // confirmarDesdeListaEspera lo usa para crear la Reserva real y luego
+    // es quien decide si conviene conservarlo como historial o eliminarlo.
     @Override
     @Transactional
     public ListaEspera confirmarInvitacion(Long listaEsperaId) {
         ListaEspera listaEspera = obtenerPorId(listaEsperaId);
 
+        if (listaEspera.getEstado() != EstadoListaEspera.INVITADO) {
+            throw new ReglaNegocioException(
+                    "La invitación no está vigente para confirmar (estado actual: " + listaEspera.getEstado() + ")");
+        }
 
-        listaEsperaRepository.delete(listaEspera);
-        return listaEspera;
+        listaEspera.setEstado(EstadoListaEspera.ACEPTADO);
+        return listaEsperaRepository.save(listaEspera);
     }
 
     @Override
     @Transactional
     public ListaEspera expirarInvitacion(Long listaEsperaId) {
         ListaEspera listaEspera = obtenerPorId(listaEsperaId);
-        listaEspera.setEstado(ESTADO_EXPIRADO);
+        listaEspera.setEstado(EstadoListaEspera.EXPIRADO);
         listaEsperaRepository.save(listaEspera);
 
-        // Según el diagrama: al expirar, se invita automáticamente al siguiente en la fila
+        //  al expirar, se invita automáticamente al siguiente en la fila
         invitarSiguiente(listaEspera.getActividad().getId());
 
         return listaEspera;

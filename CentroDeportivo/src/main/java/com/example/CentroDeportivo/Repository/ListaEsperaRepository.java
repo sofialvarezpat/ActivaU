@@ -1,6 +1,8 @@
 package com.example.CentroDeportivo.Repository;
 
+
 import com.example.CentroDeportivo.Entity.ListaEspera;
+import com.example.CentroDeportivo.Entity.Enum.EstadoListaEspera;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -15,7 +17,7 @@ public interface ListaEsperaRepository extends JpaRepository<ListaEspera, Long> 
     Optional<Integer> findMaxPosicionByActividadId(Long actividadId);
 
 
-     // Busca la primera persona en la lista de espera de una actividad que se encuentre.
+    // Busca la primera persona en la lista de espera de una actividad que se encuentre.
 
-    Optional<ListaEspera> findFirstByActividadIdAndEstadoOrderByPosicionAsc(Long actividadId, String enEspera);
+    Optional<ListaEspera> findFirstByActividadIdAndEstadoOrderByPosicionAsc(Long actividadId, EstadoListaEspera enEspera);
 }

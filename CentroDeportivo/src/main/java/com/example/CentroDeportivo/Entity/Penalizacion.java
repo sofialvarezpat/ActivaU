@@ -1,7 +1,5 @@
 package com.example.CentroDeportivo.Entity;
 
-
-
 import com.example.CentroDeportivo.Entity.Enum.TipoPenalizacion;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -34,6 +32,12 @@ public class Penalizacion {
 
     @Column(name = "fecha_fin_bloqueo")
     private LocalDateTime fechaFinBloqueo;
+
+    @Column
+    private Double valor;
+
+    @Column(name = "horas_anticipacion_cancelacion")
+    private Integer horasAnticipacionCancelacion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "afiliado_id")
