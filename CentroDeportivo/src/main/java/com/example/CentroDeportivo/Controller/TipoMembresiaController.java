@@ -1,7 +1,6 @@
 package com.example.CentroDeportivo.Controller;
 
 import com.example.CentroDeportivo.Entity.TipoMembresia;
-import com.example.CentroDeportivo.Service.ServiceImp.TipoMembresiaServiceImp;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

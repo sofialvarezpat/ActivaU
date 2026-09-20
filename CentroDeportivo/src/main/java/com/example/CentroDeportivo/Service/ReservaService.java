@@ -1,6 +1,5 @@
 package com.example.CentroDeportivo.Service;
 
-
 import com.example.CentroDeportivo.DTO.request.AceptarInvitacionRequest;
 import com.example.CentroDeportivo.DTO.request.ReservaRequest;
 import com.example.CentroDeportivo.DTO.response.CancelacionReservaResponse;

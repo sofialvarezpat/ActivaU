@@ -1,19 +1,19 @@
 package com.example.CentroDeportivo.Service;
 
-import com.example.CentroDeportivo.Entity.TipoMembresia;
+import com.example.CentroDeportivo.DTO.request.TipoMembresiaRequest;
+import com.example.CentroDeportivo.DTO.response.TipoMembresiaResponse;
 
 import java.util.List;
 
 public interface TipoMembresiaService {
 
-    //Busqueda normal
-    List<TipoMembresia> listarTodos();
+    List<TipoMembresiaResponse> listar();
 
-    TipoMembresia obtenerPorId(Long id);
+    TipoMembresiaResponse obtener(Long id);
 
-    TipoMembresia crear(TipoMembresia tipoMembresia);
+    TipoMembresiaResponse crear(TipoMembresiaRequest request);
 
-    TipoMembresia actualizar(Long id, TipoMembresia cambios);
+    TipoMembresiaResponse actualizar(Long id, TipoMembresiaRequest request);
 
     void eliminar(Long id);
 }

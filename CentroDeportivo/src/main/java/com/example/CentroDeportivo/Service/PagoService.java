@@ -1,21 +1,24 @@
 package com.example.CentroDeportivo.Service;
 
+
+import com.example.CentroDeportivo.DTO.request.DatosPagoRequest;
+import com.example.CentroDeportivo.DTO.response.PageResponse;
+import com.example.CentroDeportivo.DTO.response.PagoResponse;
+import com.example.CentroDeportivo.Entity.Afiliado;
 import com.example.CentroDeportivo.Entity.Pago;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface PagoService {
 
-    //Busqueda normal
-    List<Pago> listarPorAfiliado(Long afiliadoId);
+    /**
+     * Cobra a través de la pasarela. Si la aprueban devuelve el Pago APROBADO (aún sin reserva/membresía);
+     * si la rechazan guarda un Pago RECHAZADO y lanza PagoRechazadoException.
+     */
+    Pago cobrar(Afiliado afiliado, BigDecimal valor, String concepto, DatosPagoRequest datos);
 
-    Pago obtenerPorId(Long id);
+    List<PagoResponse> mios();
 
-    //Registra el pago de una reserva pendiente
-    //Si es aprobado se confirma la reserva
-    Pago pagarReserva(Long afiliadoId, Long reservaId, Double valor, String numeroTarjetaSimulado);
-
-    //Registra el pago de una membresía solicitada
-    //Si es aprobado se activa
-    Pago pagarMembresia(Long afiliadoId, Long membresiaId, Double valor, String numeroTarjetaSimulado);
+    PageResponse<PagoResponse> listar(int page, int size);
 }

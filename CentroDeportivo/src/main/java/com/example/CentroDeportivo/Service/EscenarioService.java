@@ -1,27 +1,20 @@
 package com.example.CentroDeportivo.Service;
 
-import com.example.CentroDeportivo.Entity.Escenario;
+
+import com.example.CentroDeportivo.DTO.request.EscenarioRequest;
+import com.example.CentroDeportivo.DTO.response.EscenarioResponse;
 
 import java.util.List;
 
 public interface EscenarioService {
 
-    //Busqueda normal
-    List<Escenario> listarTodos();
+    List<EscenarioResponse> listar();
 
-    Escenario obtenerPorId(Long id);
+    EscenarioResponse obtener(Long id);
 
-    //Busqueda por disponibilidad
-    List<Escenario> listarDisponibles();
+    EscenarioResponse crear(EscenarioRequest request);
 
-    Escenario crear(Escenario escenario);
-
-    Escenario actualizar(Long id, Escenario cambios);
-
-    Escenario ponerEnMantenimiento(Long id);
+    EscenarioResponse actualizar(Long id, EscenarioRequest request);
 
     void eliminar(Long id);
-
-    //Valida que un cupo propuesto para una actividad
-    void validarCapacidad(Long escenarioId, Integer cupoPropuesto);
 }

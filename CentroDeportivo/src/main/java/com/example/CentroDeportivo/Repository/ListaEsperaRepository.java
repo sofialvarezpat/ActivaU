@@ -1,6 +1,5 @@
 package com.example.CentroDeportivo.Repository;
 
-
 import com.example.CentroDeportivo.Entity.Enum.EstadoListaEspera;
 import com.example.CentroDeportivo.Entity.ListaEspera;
 import org.springframework.data.jpa.repository.JpaRepository;

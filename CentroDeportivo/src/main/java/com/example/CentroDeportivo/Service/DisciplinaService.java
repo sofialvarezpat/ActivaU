@@ -1,22 +1,20 @@
 package com.example.CentroDeportivo.Service;
 
-import com.example.CentroDeportivo.Entity.Disciplina;
+
+import com.example.CentroDeportivo.DTO.request.DisciplinaRequest;
+import com.example.CentroDeportivo.DTO.response.DisciplinaResponse;
 
 import java.util.List;
 
 public interface DisciplinaService {
 
-    //Busqueda normal
-    List<Disciplina> listarTodas();
+    List<DisciplinaResponse> listar();
 
-    Disciplina obtenerPorId(Long id);
+    DisciplinaResponse obtener(Long id);
 
-    //Busqueda por nivel
-    List<Disciplina> buscarPorNivel(String nivel);
+    DisciplinaResponse crear(DisciplinaRequest request);
 
-    Disciplina crear(Disciplina disciplina);
-
-    Disciplina actualizar(Long id, Disciplina cambios);
+    DisciplinaResponse actualizar(Long id, DisciplinaRequest request);
 
     void eliminar(Long id);
 }

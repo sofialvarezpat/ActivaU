@@ -1,20 +1,10 @@
 package com.example.CentroDeportivo.Service;
 
-import com.example.CentroDeportivo.Entity.Asistencia;
 
-import java.util.List;
+import com.example.CentroDeportivo.DTO.request.AsistenciaRequest;
+import com.example.CentroDeportivo.DTO.response.AsistenciaResponse;
 
 public interface AsistenciaService {
 
-    //Busqueda normal
-    List<Asistencia> listarTodas();
-
-    Asistencia obtenerPorReserva(Long reservaId);
-
-    Asistencia registrarPresente(Long reservaId);
-
-    //Boolean porque la inasistencia puede ser justificada o no
-    Asistencia registrarInasistencia(Long reservaId, String observacion, boolean justificada);
-
-    Asistencia actualizarObservacion(Long asistenciaId, String observacion);
+    AsistenciaResponse registrar(AsistenciaRequest request);
 }

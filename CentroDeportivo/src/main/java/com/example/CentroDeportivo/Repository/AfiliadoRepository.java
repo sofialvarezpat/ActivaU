@@ -1,13 +1,7 @@
 package com.example.CentroDeportivo.Repository;
 
-
-
 import com.example.CentroDeportivo.Entity.Afiliado;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import java.util.Optional;
 
-@Repository
 public interface AfiliadoRepository extends JpaRepository<Afiliado, Long> {
-    Optional<Afiliado> findByDocumentoIdentidad(String documentoIdentidad);
 }

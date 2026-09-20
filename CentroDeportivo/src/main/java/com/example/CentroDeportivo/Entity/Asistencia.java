@@ -1,19 +1,17 @@
 package com.example.CentroDeportivo.Entity;
 
-
 import com.example.CentroDeportivo.Entity.Enum.EstadoAsistencia;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "asistencia")
+@Getter
+@Setter
 @NoArgsConstructor
 public class Asistencia {
 
@@ -21,18 +19,17 @@ public class Asistencia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalTime hora;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reserva_id", unique = true)
+    private Reserva reserva;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 25)
     private EstadoAsistencia estado;
 
-    @Column(length = 300)
-    private String observacion;
+    @Column(nullable = false)
+    private LocalDateTime hora;
 
-    // Relación 0..1 a 1 con Reserva
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reserva_id", unique = true)
-    private Reserva reserva;
+    @Column(length = 300)
+    private String observaciones;
 }

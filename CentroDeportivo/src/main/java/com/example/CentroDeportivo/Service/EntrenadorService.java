@@ -1,22 +1,21 @@
 package com.example.CentroDeportivo.Service;
 
-import com.example.CentroDeportivo.Entity.Entrenador;
+import com.example.CentroDeportivo.DTO.request.EntrenadorRequest;
+import com.example.CentroDeportivo.DTO.request.EntrenadorUpdateRequest;
+import com.example.CentroDeportivo.DTO.response.EntrenadorResponse;
 
 import java.util.List;
 
 public interface EntrenadorService {
 
-    //Busqueda normal
-    List<Entrenador> listarTodos();
+    List<EntrenadorResponse> listar();
 
-    Entrenador obtenerPorId(Long id);
+    EntrenadorResponse obtener(Long id);
 
-    //Busqueda por Especialidad
-    List<Entrenador> buscarPorEspecialidad(String especialidad);
+    EntrenadorResponse crear(EntrenadorRequest request);
 
-    Entrenador registrar(Entrenador entrenador);
+    EntrenadorResponse actualizar(Long id, EntrenadorUpdateRequest request);
 
-    Entrenador actualizar(Long id, Entrenador cambios);
-
+    /** Desactiva al entrenador (no se borra: conserva el historial de actividades). */
     void desactivar(Long id);
 }

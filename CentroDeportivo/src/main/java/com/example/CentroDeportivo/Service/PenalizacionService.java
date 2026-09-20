@@ -1,27 +1,19 @@
 package com.example.CentroDeportivo.Service;
 
-import com.example.CentroDeportivo.Entity.Penalizacion;
-import jakarta.transaction.Transactional;
 
-import java.util.List;
+import com.example.CentroDeportivo.Entity.Afiliado;
+import com.example.CentroDeportivo.Entity.Penalizacion;
+import com.example.CentroDeportivo.Entity.Reserva;
+
+import java.time.LocalDateTime;
 
 public interface PenalizacionService {
 
-    //Busqueda normal
-    List<Penalizacion> listarPorAfiliado(Long afiliadoId);
+    /** Lanza BusinessRuleException si el afiliado tiene un bloqueo vigente; si ya se cumplió lo levanta. */
+    void verificarSinPenalizacion(Afiliado afiliado);
 
-    Penalizacion aplicarPorCancelacionTardia(Long afiliadoId, Long reservaId,
-                                             int horasAnticipacion, String motivo);
+    /** true si faltan menos horas que el límite configurado (12 h por defecto). */
+    boolean esCancelacionTardia(LocalDateTime ahora, LocalDateTime inicioActividad);
 
-    //OCORRECCION: se agrega el parámetro reservaId porque la entidad Penalizacion tiene una
-    //relación ManyToOne hacia Reserva
-    //Sin esto no habria forma de persistir a qué
-    //reserva/clase corresponde la inasistencia que genero la penalización
-    Penalizacion aplicarPorInasistencia(Long afiliadoId, Long reservaId, String motivo);
-
-    @Transactional
-    Penalizacion aplicarPorInasistencia(Long afiliadoId, String motivo);
-
-    //Libera el bloqueo de los afiliados cuya penalización ya cumplio el periodo de bloqueo
-    void liberarBloqueosVencidos();
+    Penalizacion registrarCancelacionTardia(Afiliado afiliado, Reserva reserva, LocalDateTime ahora);
 }
