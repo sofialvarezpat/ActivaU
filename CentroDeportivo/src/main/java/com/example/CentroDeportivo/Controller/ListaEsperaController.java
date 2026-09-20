@@ -1,70 +1,42 @@
 package com.example.CentroDeportivo.Controller;
 
-import com.example.CentroDeportivo.Entity.ListaEspera;
+import com.example.CentroDeportivo.DTO.request.AceptarInvitacionRequest;
+import com.example.CentroDeportivo.DTO.response.ListaEsperaResponse;
+import com.example.CentroDeportivo.DTO.response.ReservaResponse;
 import com.example.CentroDeportivo.Service.ListaEsperaService;
-import lombok.AllArgsConstructor;
+import com.example.CentroDeportivo.Service.ReservaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lista-espera")
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Tag(name = "Lista de espera", description = "Invitaciones FIFO cuando se libera un cupo (RF06)")
 public class ListaEsperaController {
 
     private final ListaEsperaService listaEsperaService;
+    private final ReservaService reservaService;
 
-    // LISTAR POR ACTIVIDAD
-    @GetMapping("/actividad/{actividadId}")
-    public ResponseEntity<List<ListaEspera>> listarPorActividad(@PathVariable Long actividadId) {
-        List<ListaEspera> lista = listaEsperaService.listarPorActividad(actividadId);
-        return ResponseEntity.ok(lista);
+    @GetMapping("/mias")
+    @PreAuthorize("hasRole('AFILIADO')")
+    @Operation(summary = "Mis entradas en lista de espera e invitaciones")
+    public List<ListaEsperaResponse> mias() {
+        return listaEsperaService.mias();
     }
 
-    // INSCRIBIR
-    @PostMapping("/inscribir")
-    public ResponseEntity<ListaEspera> inscribir(
-            //Extraer parametros de la petición HTTP
-            @RequestParam Long afiliadoId,
-            @RequestParam Long actividadId) {
-        ListaEspera listaEspera = listaEsperaService.inscribir(afiliadoId, actividadId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(listaEspera);
-    }
-
-    // INVITAR SIGUIENTE
-    @PostMapping("/actividad/{actividadId}/invitar-siguiente")
-    public ResponseEntity<ListaEspera> invitarSiguiente(@PathVariable Long actividadId) {
-        Optional<ListaEspera> invitado = listaEsperaService.invitarSiguiente(actividadId);
-        if (invitado.isPresent()) {
-
-            return ResponseEntity.ok(invitado.get());
-        } else {
-
-            return ResponseEntity.noContent().build();
-        }
-    }
-
-    // CONFIRMAR INVITACION
-    @PatchMapping("/{id}/confirmar")
-    public ResponseEntity<ListaEspera> confirmarInvitacion(@PathVariable Long id) {
-        ListaEspera listaEspera = listaEsperaService.confirmarInvitacion(id);
-        return ResponseEntity.ok(listaEspera);
-    }
-
-    // EXPIRAR INVITACION
-    @PatchMapping("/{id}/expirar")
-    public ResponseEntity<ListaEspera> expirarInvitacion(@PathVariable Long id) {
-        ListaEspera listaEspera = listaEsperaService.expirarInvitacion(id);
-        return ResponseEntity.ok(listaEspera);
-    }
-
-    // OBTENER POR ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ListaEspera> obtenerPorId(@PathVariable Long id) {
-        ListaEspera listaEspera = listaEsperaService.obtenerPorId(id);
-        return ResponseEntity.ok(listaEspera);
+    @PostMapping("/{id}/aceptar")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('AFILIADO')")
+    @Operation(summary = "Aceptar una invitación y convertirla en reserva (pago o membresía)")
+    public ReservaResponse aceptar(@PathVariable Long id,
+                                   @Valid @RequestBody(required = false) AceptarInvitacionRequest request) {
+        return reservaService.aceptarInvitacion(id, request);
     }
 }

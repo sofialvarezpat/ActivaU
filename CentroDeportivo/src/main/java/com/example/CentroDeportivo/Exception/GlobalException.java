@@ -40,8 +40,8 @@ public class GlobalException {
         return build(HttpStatus.BAD_REQUEST, "Valor inválido para el parámetro '" + ex.getName() + "'", req, List.of());
     }
 
-    @ExceptionHandler(ReglaNegocioException.class)
-    public ResponseEntity<ApiError> regla(ReglaNegocioException ex, HttpServletRequest req) {
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ApiError> regla(BusinessRuleException ex, HttpServletRequest req) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage(), req, List.of());
     }
 
@@ -55,9 +55,9 @@ public class GlobalException {
         return build(HttpStatus.FORBIDDEN, "No tiene permisos para esta operación", req, List.of());
     }
 
-    @ExceptionHandler({RecursoNoEncontradoException.class, NoResourceFoundException.class})
+    @ExceptionHandler({ResourceNotFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<ApiError> noEncontrado(Exception ex, HttpServletRequest req) {
-        String mensaje = ex instanceof RecursoNoEncontradoException ? ex.getMessage() : "Recurso no encontrado";
+        String mensaje = ex instanceof ResourceNotFoundException ? ex.getMessage() : "Recurso no encontrado";
         return build(HttpStatus.NOT_FOUND, mensaje, req, List.of());
     }
 

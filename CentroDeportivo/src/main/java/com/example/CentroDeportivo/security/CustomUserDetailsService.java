@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario u = usuarioRepository.findByCorreo(correo)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
         return User.withUsername(u.getCorreo())
-                .password(u.getContraseña())
+                .password(u.getContrasena())
                 .roles(u.getRol().name())                       // se convierte en ROLE_<ROL>
                 .disabled(u.getEstado() != EstadoUsuario.ACTIVO)
                 .build();

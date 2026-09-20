@@ -1,8 +1,8 @@
 package com.example.CentroDeportivo.Controller;
 
-import com.example.CentroDeportivo.DTO.request.TipoMembresiaRequest;
-import com.example.CentroDeportivo.DTO.response.TipoMembresiaResponse;
-import com.example.CentroDeportivo.Service.TipoMembresiaService;
+import com.example.CentroDeportivo.DTO.request.DisciplinaRequest;
+import com.example.CentroDeportivo.DTO.response.DisciplinaResponse;
+import com.example.CentroDeportivo.Service.DisciplinaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,40 +14,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tipos-membresia")
+@RequestMapping("/api/disciplinas")
 @RequiredArgsConstructor
-@Tag(name = "Tipos de membresía", description = "Datos maestros (RF02). Escritura solo para ADMINISTRADOR")
-public class TipoMembresiaController {
+@Tag(name = "Disciplinas", description = "Datos maestros (RF02). Escritura solo para ADMINISTRADOR")
+public class DisciplinaController {
 
-    private final TipoMembresiaService tipoMembresiaService;
+    private final DisciplinaService disciplinaService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Listar tipos de membresía")
-    public List<TipoMembresiaResponse> listar() {
-        return tipoMembresiaService.listar();
+    @Operation(summary = "Listar disciplinas")
+    public List<DisciplinaResponse> listar() {
+        return disciplinaService.listar();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Consultar por id")
-    public TipoMembresiaResponse obtener(@PathVariable Long id) {
-        return tipoMembresiaService.obtener(id);
+    public DisciplinaResponse obtener(@PathVariable Long id) {
+        return disciplinaService.obtener(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @Operation(summary = "Crear")
-    public TipoMembresiaResponse crear(@Valid @RequestBody TipoMembresiaRequest request) {
-        return tipoMembresiaService.crear(request);
+    public DisciplinaResponse crear(@Valid @RequestBody DisciplinaRequest request) {
+        return disciplinaService.crear(request);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @Operation(summary = "Actualizar")
-    public TipoMembresiaResponse actualizar(@PathVariable Long id, @Valid @RequestBody TipoMembresiaRequest request) {
-        return tipoMembresiaService.actualizar(id, request);
+    public DisciplinaResponse actualizar(@PathVariable Long id, @Valid @RequestBody DisciplinaRequest request) {
+        return disciplinaService.actualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
@@ -55,6 +55,6 @@ public class TipoMembresiaController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     @Operation(summary = "Eliminar")
     public void eliminar(@PathVariable Long id) {
-        tipoMembresiaService.eliminar(id);
+        disciplinaService.eliminar(id);
     }
 }
