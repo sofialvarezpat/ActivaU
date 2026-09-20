@@ -3,6 +3,8 @@ package com.example.CentroDeportivo.Entity;
 import com.example.CentroDeportivo.Entity.Enum.EstadoPago;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +20,7 @@ public class Pago {
     private String concepto;
 
     @Column(nullable = false, precision = 12, scale = 2)
-    private Double valor;
+    private BigDecimal valor;
 
 
     @Enumerated(EnumType.STRING)
@@ -53,4 +55,12 @@ public class Pago {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "membresia_id", unique = true)
     private Membresia membresia;
+
+    //se agrega para el RNF seguridad
+    @Column(name = "tarjeta_enmascarada", length = 25)
+    private String tarjetaEnmascarada;
+
+
+    @Column(name = "mensaje_banco", length = 200)
+    private String mensajeBanco;
 }

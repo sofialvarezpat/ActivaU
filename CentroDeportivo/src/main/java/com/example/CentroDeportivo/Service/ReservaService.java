@@ -1,37 +1,22 @@
 package com.example.CentroDeportivo.Service;
 
 
-import com.example.CentroDeportivo.Entity.Actividad;
-import com.example.CentroDeportivo.Entity.Reserva;
+import com.example.CentroDeportivo.DTO.request.AceptarInvitacionRequest;
+import com.example.CentroDeportivo.DTO.request.ReservaRequest;
+import com.example.CentroDeportivo.DTO.response.CancelacionReservaResponse;
+import com.example.CentroDeportivo.DTO.response.ReservaResponse;
 
 import java.util.List;
 
 public interface ReservaService {
 
+    ReservaResponse reservar(ReservaRequest request);
 
-    //Busqueda normal
-    List<Reserva> listarPorAfiliado(Long afiliadoId);
+    ReservaResponse aceptarInvitacion(Long listaEsperaId, AceptarInvitacionRequest request);
 
-    Reserva obtenerPorId(Long id);
+    CancelacionReservaResponse cancelar(Long reservaId);
 
-    //Crea la reserva de un afiliado sobre una actividad
-    //Si tiene membresia vigente, queda confirmada de inmediato
-    //En caso contrario, pendiente de pago
-    Reserva reservar(Long afiliadoId, Long actividadId);
+    List<ReservaResponse> mias();
 
-    //Llamado por PagoService cuando se confirma el pago asociado a una reserva pendiente
-    Reserva confirmarPorPago(Long reservaId);
-
-
-    //Cancela una reserva, libera el cupo, invita al siguiente en lista de espera
-    //Genera penalización si la cancelación fue fuera de plazo
-    Reserva cancelar(Long reservaId, String motivo);
-
-    //Convierte una invitación de lista de espera ya ACEPTADA en una Reserva real
-
-
-    Reserva confirmarDesdeListaEspera(Long listaEsperaId);
-
-    //n afiliado no puede reservar dos actividades que se traslapen
-    void validarSinTraslapeConOtrasReservas(Long afiliadoId, Actividad actividadNueva, Long reservaIdExcluir);
+    List<ReservaResponse> porActividad(Long actividadId);
 }

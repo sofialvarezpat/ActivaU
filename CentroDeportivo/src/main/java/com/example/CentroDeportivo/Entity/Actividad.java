@@ -7,8 +7,11 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 @Setter
 @Getter
@@ -53,4 +56,11 @@ public class Actividad {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "escenario_id")
     private Escenario escenario;
+
+    //definimos el precio de las actividades dentro de ellas para evitar complejidades (0 = gratuita)
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal precio = BigDecimal.ZERO;
+
+
+    public LocalDateTime inicio(){return LocalDateTime.of(fecha, horaInicio);}
 }
